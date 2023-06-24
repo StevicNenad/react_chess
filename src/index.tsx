@@ -7,8 +7,8 @@ import "./index.scss";
 const el = document.getElementById("root") as HTMLElement;
 
 if (el) {
-  const root = ReactDOM.createRoot(el);
-  root.render(<App />);
+    const root = ReactDOM.createRoot(el);
+    root.render(<App/>);
 } else {
-  console.error("Root element not found. Could not render Application.");
+    console.error("Root element not found. Could not render Application.");
 }

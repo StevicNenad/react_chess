@@ -1,0 +1,40 @@
+.color-chooser-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3ch;
+  width: 45ch;
+  height: 45ch;
+  padding: 3ch;
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 2px rgba(255, 255, 255, 0.15) solid;
+  backdrop-filter: blur(8px);
+  z-index: 1;
+  border-radius: 1ch;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.color-chooser-box:hover {
+  & .color-picker {
+    transform: scale(1.1);
+  }
+}
+
+.color-picker {
+  position: absolute;
+  transition: transform 0.3s;
+  width: 120%;
+  height: 120%;
+  padding: 6ch;
+  top: -2%;
+}
+
+.left {
+  left: 0;
+}
+
+.right {
+  right: 0;
+}
+
