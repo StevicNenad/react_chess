@@ -2,11 +2,18 @@ import {Chessboard} from "react-chessboard";
 import createPieces from "../../assets/pieces/PieceFactory";
 import "./GamePage.style.scss"
 import {CSSProperties, useEffect, useState} from "react";
-import {Chess, Move, Piece, PieceSymbol} from "chess.ts";
+import {Chess, Move, PieceSymbol} from "chess.ts";
 import {Square} from "chess.ts/dist/types";
-import {PromotionPieceOption} from "react-chessboard/dist/chessboard/types";
+import {BoardOrientation} from "react-chessboard/dist/chessboard/types";
+import {useParams} from "react-router-dom";
+import {child, get, getDatabase, goOffline, onDisconnect, ref, set} from "firebase/database";
+import Lobby from "../../types/Lobby.type";
+import Cookies from "js-cookie";
+
 
 const GamePage = () => {
+    const {id} = useParams();
+    const db = getDatabase();
     const [game, setGame] = useState(new Chess());
     const [visibleClass, setVisibleClass] = useState('');
     const [scaleClass, setScaleClass] = useState('');
@@ -16,13 +23,56 @@ const GamePage = () => {
     const [rightClickedSquares, setRightClickedSquares] = useState<Record<string, CSSProperties | undefined>>({});
     const [moveSquares, setMoveSquares] = useState({});
     const [optionSquares, setOptionSquares] = useState({});
+    const [boardOrientation, setBoardOrientation] = useState<BoardOrientation>("white");
+    const [isPieceClicked, setPieceClicked] = useState(false);
 
     useEffect(() => {
+        get(child(ref(db), `lobbies/${id}`)).then((snapshot) => {
+            if (snapshot.exists()) {
+                const lobby: Lobby = snapshot.val();
+                console.log(lobby);
+
+                const userId = Cookies.get("userID");
+                if (lobby.white === userId) {
+                    setBoardOrientation("white");
+                } else {
+                    setBoardOrientation("black");
+                }
+
+                let playerDisconnectStatus;
+
+                if (lobby.player1 === userId) {
+                    lobby.player1Connected = true;
+                    playerDisconnectStatus = ref(db, `/lobbies/${id}/player1Connected`);
+                } else if (lobby.player2 === userId) {
+                    lobby.player2Connected = true;
+                    playerDisconnectStatus = ref(db, `/lobbies/${id}/player2Connected`);
+                }
+
+                if (playerDisconnectStatus) {
+                    onDisconnect(playerDisconnectStatus).set(false);
+                }
+
+                setGame(new Chess(lobby.fen));
+
+                set(ref(db, `lobbies/${id}`), lobby).then(r => console.log(r));
+            } else {
+                console.log("No data available");
+                return;
+            }
+        }).catch((error) => {
+            console.error(error);
+        });
+
         setTimeout(() => {
             setVisibleClass('visible');
             setScaleClass('scale');
         }, 500);
     }, []);
+
+    window.onpopstate = () => {
+        goOffline(db);
+    }
 
     const safeGameMutate = (modify: (game: Chess) => void) => {
         setGame((g: Chess) => {
@@ -44,18 +94,13 @@ const GamePage = () => {
 
         const newSquares: { [key: string]: CSSProperties } = {};
         moves.map((move) => {
-            const moveToPiece = game.get(move.to);
-            const squarePiece = game.get(square);
-
-            if (moveToPiece && squarePiece) {
-                newSquares[move.to] = {
-                    background:
-                        moveToPiece.color !== squarePiece.color
-                            ? "radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)"
-                            : "radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)",
-                    borderRadius: "50%",
-                };
-            }
+            newSquares[move.to] = {
+                background:
+                    game.get(move.to) && game.get(move.to)?.color !== game.get(square)?.color
+                        ? "radial-gradient(circle, rgba(0,0,0,.2) 65%, transparent 65%)"
+                        : "radial-gradient(circle, rgba(0,0,0,.2) 25%, transparent 25%)",
+                borderRadius: "50%",
+            };
             return move;
         });
 
@@ -66,19 +111,6 @@ const GamePage = () => {
         return true;
     }
 
-    const makeRandomMove = () => {
-        const possibleMoves: string[] = game.moves();
-
-        // exit if the game is over
-        if (game.gameOver() || game.inDraw() || possibleMoves.length === 0)
-            return;
-
-        const randomIndex = Math.floor(Math.random() * possibleMoves.length);
-        safeGameMutate((game) => {
-            game.move(possibleMoves[randomIndex]);
-        });
-    }
-
     const onSquareClick = (square: Square) => {
         setRightClickedSquares({});
 
@@ -86,6 +118,7 @@ const GamePage = () => {
         if (!moveFrom) {
             const hasMoveOptions = getMoveOptions(square);
             if (hasMoveOptions) {
+                setPieceClicked(true);
                 setMoveFrom(square);
             }
             return;
@@ -93,6 +126,7 @@ const GamePage = () => {
 
         // to square
         if (!moveTo) {
+            setPieceClicked(false);
             // check if valid move before showing dialog
             const moves: Move[] = game.moves({
                 square: moveFrom,
@@ -142,8 +176,9 @@ const GamePage = () => {
             }
 
             setGame(gameCopy);
+            saveGame(gameCopy);
 
-            setTimeout(makeRandomMove, 300);
+            //setTimeout(makeRandomMove, 300);
             setMoveFrom("");
             setMoveTo(null);
             setOptionSquares({});
@@ -151,28 +186,35 @@ const GamePage = () => {
         }
     }
 
-    const onPromotionPieceSelect = (piece: PromotionPieceOption | undefined) => {
-        // if no piece passed then user has cancelled dialog, don't make move and reset
-        if (piece && moveTo) { // Check that moveTo is not null
-            const gameCopy: Chess = new Chess(game.fen());
-            const symbol: PieceSymbol = piece.charAt(1) as PieceSymbol;
-            gameCopy.move({
-                from: moveFrom,
-                to: moveTo,
-                promotion: symbol ?? "q",
-            });
-            setGame(gameCopy);
-            setTimeout(makeRandomMove, 300);
-        }
+    const onDrop = (sourceSquare: Square, targetSquare: Square, piece: string) => {
+        const gameCopy = new Chess(game.fen());
+        const symbol: PieceSymbol = piece.charAt(1).toLowerCase() as PieceSymbol;
+        const move = gameCopy.move({
+            from: moveFrom,
+            to: targetSquare,
+            promotion: symbol ?? "q",
+        });
+        setGame(gameCopy);
 
+        // illegal move
+        if (move === null) return false;
+
+        saveGame(gameCopy);
+
+        // store timeout so it can be cleared on undo/reset so computer doesn't execute move
+        //const newTimeout = setTimeout(makeRandomMove, 200);
+        //setCurrentTimeout(newTimeout);
+        setOptionSquares({});
         setMoveFrom("");
         setMoveTo(null);
-        setShowPromotionDialog(false);
-        setOptionSquares({});
         return true;
     }
 
-    function onSquareRightClick(square: Square) {
+    const saveGame = (gameCopy: Chess) => {
+        set(ref(db, `lobbies/${id}/fen`), gameCopy.fen());
+    }
+
+    const onSquareRightClick = (square: Square) => {
         const colour = "rgba(0, 0, 255, 0.4)";
         setRightClickedSquares({
             ...rightClickedSquares,
@@ -180,18 +222,38 @@ const GamePage = () => {
                 rightClickedSquares[square] &&
                 rightClickedSquares[square]?.backgroundColor === colour
                     ? undefined
-                    : { backgroundColor: colour },
+                    : {backgroundColor: colour},
         });
     }
 
+    const onPieceDragBegin = (piece: string, square: Square) => {
+        setRightClickedSquares({});
+
+        // from square
+        if (!moveFrom) {
+            const hasMoveOptions = getMoveOptions(square);
+            if (hasMoveOptions) {
+                setMoveFrom(square);
+            }
+            return;
+        }
+    }
+
+    const onMouseOverSquare = (square: Square) => {
+        if (!isPieceClicked) {
+            getMoveOptions(square);
+        }
+    }
+
+
     return (
         <div className={`game-page-container ${visibleClass}`}>
-            <img className={`logo-game-page ${visibleClass}`} src={"logo.svg"}/>
+            <img className={`logo-game-page ${visibleClass}`} src={"../logo.svg"} alt={"logo"}/>
             <div className={`chessboard-container ${scaleClass}`}>
                 <Chessboard
-                    boardOrientation="black"
                     position={game.fen()}
-                    arePiecesDraggable={false}
+                    boardOrientation={boardOrientation}
+                    arePiecesDraggable
                     customDarkSquareStyle={{backgroundColor: "#573a2e"}}
                     customLightSquareStyle={{backgroundColor: "#8a785d"}}
                     customPieces={createPieces()}
@@ -207,11 +269,14 @@ const GamePage = () => {
                         ...optionSquares,
                         ...rightClickedSquares,
                     }}
-                    onPromotionPieceSelect={onPromotionPieceSelect}
                     promotionToSquare={moveTo}
                     showPromotionDialog={showPromotionDialog}
+                    onPieceDrop={onDrop}
+                    onPieceDragBegin={onPieceDragBegin}
+                    onMouseOverSquare={onMouseOverSquare}
                 />
             </div>
+            <div className={`lobby-code ${visibleClass}`}>{id}</div>
         </div>
     );
 }

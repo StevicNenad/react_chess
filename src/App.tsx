@@ -19,7 +19,7 @@ const App = () => {
             <BrowserRouter basename="/">
                 <Routes>
                     <Route path="/" element={<HomePage/>}/>
-                    <Route path="/lobby" element={<GamePage/>}/>
+                    <Route path="/lobby/:id" element={<GamePage/>}/>
                 </Routes>
             </BrowserRouter>
         </ThemeProvider>

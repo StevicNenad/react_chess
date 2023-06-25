@@ -1,46 +1,99 @@
 import {Box, Button, Container, TextField} from "@mui/material";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {nanoid} from "nanoid";
 import { useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 import "./HomePage.style.scss";
 import ColorChooserBox from "../../component/ColorChooserBox/ColorChooserBox.component";
-import {getDatabase, ref, set} from "firebase/database";
+import {getDatabase, ref, set, goOnline, get, child, onDisconnect,} from "firebase/database";
+import {BoardOrientation} from "react-chessboard/dist/chessboard/types";
+import Lobby from "../../types/Lobby.type";
+import {Chess} from "chess.ts";
 
 
 const HomePage = () => {
+    const db = getDatabase();
     const [code, setCode] = useState("");
     const [showColorSelection, setShowColorSelection] = useState<Boolean>(false);
     const [fadeOut, setFadeOut] = useState(false);
     const navigate = useNavigate();
 
-    const handleJoin = () => {
-        // handle joining the game with the code
+    useEffect(() => {
+        //goOnline(db);
+    },[])
+
+    const handleJoin = async () => {
+        get(child(ref(db), `lobbies/${code}`)).then((snapshot) => {
+            if (snapshot.exists()) {
+                const lobby: Lobby = snapshot.val();
+                const userID = getUserID();
+
+                if (userID && lobby.white !== userID && lobby.black !== userID) {
+                    if(lobby.white === null) {
+                        lobby.white = userID;
+                    } else {
+                        lobby.black = userID;
+                    }
+                }
+
+                if(userID && lobby.player1 !== userID && lobby.player2 !== userID) {
+                    lobby.player2 = userID;
+                }
+
+                set(ref(db, `lobbies/${code}`), lobby);
+            } else {
+                console.log("No data available");
+                return;
+            }
+        }).catch((error) => {
+            console.error(error);
+        });
+
+        setFadeOut(true);
+        setTimeout(() => {
+            navigate(`/lobby/${code}`);
+        }, 2500);
     };
 
-    const createLobby = async (color: string) => {
+    const createLobby = async (color: BoardOrientation) => {
         try {
-            let userID = Cookies.get("userID");
-            if (!userID) {
-                userID = nanoid();
-                Cookies.set("userID", userID);
-            }
             const lobbyId = nanoid(8);
-            const lobbyData = { [color]: userID };
-            const db = getDatabase();
+            const userID = getUserID();
 
-            await set(ref(db, "lobbies/" + lobbyId), lobbyData); // Wait for the server request to complete
+            let lobby: Lobby = {
+                white: null,
+                black: null,
+                player1: userID,
+                player1Connected: false,
+                player2: null,
+                player2Connected: false,
+                fen: new Chess().fen(),
+            };
+
+            lobby[color] = userID;
+
+            await set(ref(db, "lobbies/" + lobbyId), lobby); // Wait for the server request to complete
 
             setFadeOut(true);
-
             setTimeout(() => {
-                navigate("/lobby");
+                navigate(`/lobby/${lobbyId}`);
             }, 2500);
         } catch (error) {
             // Handle error, e.g., show an error message
             console.error("Error creating lobby:", error);
         }
     };
+
+    const getUserID = () => {
+        let userID = Cookies.get("userID");
+
+        if (!userID) {
+            userID = nanoid();
+            Cookies.set("userID", userID);
+        }
+
+        return userID;
+    }
 
     const startCreate = () => {
         setShowColorSelection(true);

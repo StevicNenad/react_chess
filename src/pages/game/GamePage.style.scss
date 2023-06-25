@@ -11,16 +11,27 @@
 }
 
 .chessboard-container {
-  transition: width 1s ease, height 1s ease;
+  transition: width .5s ease, height .5s ease;
   height: fit-content;
-  width: 55%;
+  width: 55vmin;
+  box-shadow: 0 0 200px -180px white;
 }
 
 .logo-game-page {
+  transition: opacity 1s 1s;
+  position: absolute;
+  width: 30vmin;
+  top: 5%;
+  opacity: 0;
+}
+
+.lobby-code {
   transition: opacity 1s 1.5s;
   position: absolute;
-  width: 30%;
-  top: 9%;
+  bottom: 5%;
+  color: #ccc;
+  font-size: 5vmin;
+  font-family: "Arial";
   opacity: 0;
 }
 
@@ -29,5 +40,5 @@
 }
 
 .scale {
-  width: 60%;
+  width: 60vmin;
 }
