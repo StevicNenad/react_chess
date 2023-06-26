@@ -11,16 +11,17 @@
 }
 
 .chessboard-container {
+  position: relative;
   transition: width .5s ease, height .5s ease;
   height: fit-content;
   width: 55vmin;
-  box-shadow: 0 0 200px -180px white;
+  box-shadow: 0 0 200px -200px white;
 }
 
 .logo-game-page {
   transition: opacity 1s 1s;
   position: absolute;
-  width: 30vmin;
+  width: 20vmin;
   top: 5%;
   opacity: 0;
 }
@@ -35,10 +36,52 @@
   opacity: 0;
 }
 
+.chessboard-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0, 0.8);
+  z-index: 10000;
+}
+
+.animation {
+  height: 15vmin;
+}
+
+.waiting-for-players-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 100%;
+  color: #cccccc;
+  font-size: 2.5vmin;
+  font-family: Arial, sans-serif;
+}
+
 .visible {
   opacity: 1;
 }
 
 .scale {
   width: 60vmin;
+}
+
+.display-none {
+  display: none;
+}
+
+@media screen and (max-width: 600px) {
+  .chessboard-container {
+    width: 100%;
+  }
+
+  .logo-game-page {
+    width: 50vmin;
+  }
+
+  .lobby-code {
+    font-size: 10vmin;
+  }
 }

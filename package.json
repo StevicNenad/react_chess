@@ -19,6 +19,7 @@
     "chess.ts": "^0.16.2",
     "firebase": "^9.23.0",
     "js-cookie": "^3.0.5",
+    "lottie-react": "^2.4.0",
     "nanoid": "^4.0.2",
     "react": "^18.2.0",
     "react-chessboard": "^3.1.0",
@@ -34,7 +35,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "predeploy" : "npm run build",
+    "deploy" : "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
@@ -57,6 +60,7 @@
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@types/js-cookie": "^3.0.3",
+    "gh-pages": "^5.0.0",
     "prettier": "^2.8.8"
   }
 }
