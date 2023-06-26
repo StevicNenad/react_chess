@@ -18,7 +18,7 @@ const App = () => {
         <ThemeProvider theme={theme}>
             <BrowserRouter basename="/">
                 <Routes>
-                    <Route path="/" element={<HomePage/>}/>
+                    <Route path={process.env.REACT_APP_BASE_PATH} element={<HomePage/>}/>
                     <Route path="/lobby/:id" element={<GamePage/>}/>
                 </Routes>
             </BrowserRouter>

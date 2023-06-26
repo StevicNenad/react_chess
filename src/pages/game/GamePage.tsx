@@ -29,6 +29,7 @@ const GamePage = () => {
   const [isOtherPlayerConnected, setOtherPlayerConnected] = useState(false);
   const [otherPlayer, setOtherPlayer] = useState("");
   const [playerColor, setPlayerColor] = useState("");
+  const [gameEvent, setGameEvent] = useState("");
 
   useEffect(() => {
     get(child(ref(db), `lobbies/${id}`)).then((snapshot) => {
@@ -83,20 +84,20 @@ const GamePage = () => {
   useEffect(() => {
     const fenRef = ref(db, `lobbies/${id}/fen`);
     const unsub = onValue(fenRef, (snapshot) => {
+      setGameEvent("");
       const updatedFen = snapshot.val();
       const updatedGame = new Chess(updatedFen);
       setGame(updatedGame);  // updating state triggers re-render
 
       if(updatedGame.inCheck()) {
-        console.log("check");
-      }
-
-      if(updatedGame.inCheckmate()) {
-        console.log("checkmate");
+        if(updatedGame.inCheckmate() || updatedGame.gameOver()) {
+          setGameEvent("Checkmate");
+        }
+       setGameEvent("Check");
       }
 
       if(updatedGame.inStalemate()) {
-        console.log("stalemate");
+        setGameEvent("Stalemate");
       }
     });
 
@@ -321,7 +322,7 @@ const GamePage = () => {
 
   return (
       <div className={`game-page-container ${visibleClass}`}>
-        <img className={`logo-game-page ${visibleClass}`} src={"../logo.svg"} alt={"logo"}/>
+        <img className={`logo-game-page ${visibleClass}`} src={ (process.env.REACT_APP_ENVIROMENT === "dev" ? ".." : process.env.REACT_APP_BASE_PATH) + "/logo.svg"} alt={"logo"}/>
         <div className={`chessboard-container ${scaleClass}`}>
           <div className={`chessboard-overlay ${isOtherPlayerConnected ? 'display-none' : ''}`}>
             <div className={"waiting-for-players-container"}>
@@ -356,6 +357,7 @@ const GamePage = () => {
           />
         </div>
         <div className={`lobby-code ${visibleClass} ${isOtherPlayerConnected ? 'display-none' : ''}`} >{id}</div>
+        <div className={`game-event ${gameEvent ? "visible" : ""}`}>{gameEvent}</div>
       </div>
   );
 }

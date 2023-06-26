@@ -36,6 +36,16 @@
   opacity: 0;
 }
 
+.game-event {
+  transition: opacity 1s;
+  position: absolute;
+  bottom: 10%;
+  color: #ccc;
+  font-size: 5vmin;
+  font-family: "Arial";
+  opacity: 0;
+}
+
 .chessboard-overlay {
   position: absolute;
   width: 100%;
@@ -73,6 +83,10 @@
 }
 
 @media screen and (max-width: 600px) {
+  .game-page-container {
+    height: -webkit-fill-available;
+  }
+
   .chessboard-container {
     width: 100%;
   }

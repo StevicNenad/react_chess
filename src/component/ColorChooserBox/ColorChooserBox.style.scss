@@ -1,10 +1,11 @@
 .color-chooser-box {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 3ch;
+  aspect-ratio: 1 / 1;
   width: 45ch;
-  height: 45ch;
   padding: 3ch;
   background-color: rgba(255, 255, 255, 0.15);
   border: 2px rgba(255, 255, 255, 0.15) solid;
@@ -38,3 +39,14 @@
   right: 0;
 }
 
+@media screen and (max-width: 600px) {
+  .color-chooser-box {
+    width: 25vmin;
+  }
+
+  .color-picker {
+    top: -15%;
+    width: 130% !important;
+    height: 130% !important;
+  }
+}

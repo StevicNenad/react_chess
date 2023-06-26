@@ -1,11 +1,11 @@
 import {Box, Button, Container, TextField} from "@mui/material";
 import {useEffect, useState} from "react";
 import {nanoid} from "nanoid";
-import { useNavigate } from "react-router-dom";
+import {useNavigate} from "react-router-dom";
 import Cookies from "js-cookie";
 import "./HomePage.style.scss";
 import ColorChooserBox from "../../component/ColorChooserBox/ColorChooserBox.component";
-import {getDatabase, ref, set, goOnline, get, child, onDisconnect,} from "firebase/database";
+import {child, get, getDatabase, goOnline, ref, set,} from "firebase/database";
 import {BoardOrientation} from "react-chessboard/dist/chessboard/types";
 import Lobby from "../../types/Lobby.type";
 import {Chess} from "chess.ts";
@@ -19,40 +19,35 @@ const HomePage = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        //goOnline(db);
-    },[])
+        goOnline(db);
+    }, [])
 
-    const handleJoin = async () => {
-        get(child(ref(db), `lobbies/${code}`)).then((snapshot) => {
+    const handleJoin = async (event: React.FormEvent<HTMLFormElement> | undefined) => {
+        event?.preventDefault();
+
+        try {
+            const snapshot = await get(child(ref(db), `lobbies/${code}`));
             if (snapshot.exists()) {
                 const lobby: Lobby = snapshot.val();
-                const userID = getUserID();
 
-                if (userID && lobby.white !== userID && lobby.black !== userID) {
-                    if(lobby.white === null) {
-                        lobby.white = userID;
-                    } else {
-                        lobby.black = userID;
-                    }
+                if (!checkLobbyJoinPossible(lobby)) {
+                    return;
                 }
 
-                if(userID && lobby.player1 !== userID && lobby.player2 !== userID) {
-                    lobby.player2 = userID;
-                }
+                handlePlayer(lobby);
 
-                set(ref(db, `lobbies/${code}`), lobby);
+                await set(ref(db, `lobbies/${code}`), lobby);
+
+                setFadeOut(true);
+                setTimeout(() => {
+                    navigate(`/lobby/${code}`);
+                }, 2500);
             } else {
                 console.log("No data available");
-                return;
             }
-        }).catch((error) => {
+        } catch (error) {
             console.error(error);
-        });
-
-        setFadeOut(true);
-        setTimeout(() => {
-            navigate(`/lobby/${code}`);
-        }, 2500);
+        }
     };
 
     const createLobby = async (color: BoardOrientation) => {
@@ -72,17 +67,44 @@ const HomePage = () => {
 
             lobby[color] = userID;
 
-            await set(ref(db, "lobbies/" + lobbyId), lobby); // Wait for the server request to complete
+            await set(ref(db, "lobbies/" + lobbyId), lobby);
 
             setFadeOut(true);
             setTimeout(() => {
                 navigate(`/lobby/${lobbyId}`);
             }, 2500);
         } catch (error) {
-            // Handle error, e.g., show an error message
             console.error("Error creating lobby:", error);
         }
     };
+
+    const checkLobbyJoinPossible = (lobby: Lobby) => {
+        if (lobby.player1Connected && lobby.player2Connected) {
+            console.log("lobby full");
+            return false;
+        }
+
+        if (lobby.player1 && lobby.player2) {
+            console.log("player not recognized");
+            return false;
+        }
+
+        return true;
+    }
+
+    const handlePlayer = (lobby: Lobby) => {
+        const userID = getUserID();
+
+        if (!lobby.white) {
+            lobby.white = userID;
+        } else {
+            lobby.black = userID;
+        }
+
+        if (lobby.player1 !== userID && lobby.player2 !== userID) {
+            lobby.player2 = userID;
+        }
+    }
 
     const getUserID = () => {
         let userID = Cookies.get("userID");
@@ -101,8 +123,8 @@ const HomePage = () => {
 
     return (
         <div className={`page-container ${fadeOut ? 'fade-out' : ''}`}>
-            <video autoPlay loop muted className={"background-video"}>
-                <source src="/background.mp4" type="video/mp4"/>
+            <video autoPlay loop muted playsInline className={"background-video"}>
+                <source src="./background.mp4" type="video/mp4"/>
             </video>
             <div className={"overlay"}/>
             <Container
@@ -116,6 +138,7 @@ const HomePage = () => {
                 }}
             >
                 <Box
+                    className={"lobby-form-box"}
                     component="form"
                     sx={{
                         position: "absolute",
@@ -136,8 +159,9 @@ const HomePage = () => {
                     }}
                     noValidate
                     autoComplete="off"
+                    onSubmit={(event) => handleJoin(event)}
                 >
-                    <img className={"logo"} src={"/logo.svg"} alt="Logo"/>
+                    <img className={"logo"} src={"./logo.svg"} alt="Logo"/>
                     <Box sx={{display: "flex", gap: "10px", zIndex: "1", width: "100%"}}>
                         <TextField
                             label="Enter Lobby Code"
@@ -146,7 +170,7 @@ const HomePage = () => {
                             fullWidth
                             onChange={(e) => setCode(e.target.value)}
                         />
-                        <Button variant="contained" onClick={handleJoin}>
+                        <Button variant="contained" type={"submit"}>
                             Join
                         </Button>
                     </Box>
@@ -155,6 +179,7 @@ const HomePage = () => {
                     </Button>
                 </Box>
                 <Box
+                    className={"color-chooser-container"}
                     sx={{
                         position: "absolute",
                         display: "flex",
@@ -170,8 +195,9 @@ const HomePage = () => {
                         visibility: showColorSelection ? "visible" : "hidden",
                     }}
                 >
-                    <img src={"/choose-color.svg"} alt="choose color" style={{width: "80%", padding: "6ch"}}/>
+                    <img className={"choose-color-text"} src={"./choose-color.svg"} alt="choose color"/>
                     <Box
+                        className={"color-chooser-box-container"}
                         sx={{
                             display: "flex",
                             flexDirection: "row",
@@ -185,7 +211,7 @@ const HomePage = () => {
                     >
                         <ColorChooserBox src="./color-pick-white.svg" color="white"
                                          onClick={() => createLobby("white")}/>
-                        <ColorChooserBox src="/color-pick-black.svg" color="black"
+                        <ColorChooserBox src="./color-pick-black.svg" color="black"
                                          onClick={() => createLobby("black")}/>
                     </Box>
                 </Box>
