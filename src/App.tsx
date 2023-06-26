@@ -18,7 +18,7 @@ const App = () => {
         <ThemeProvider theme={theme}>
             <BrowserRouter basename="/">
                 <Routes>
-                    <Route path="/" element={<HomePage/>}/>
+                    <Route path="/react_chess" element={<HomePage/>}/>
                     <Route path="/lobby/:id" element={<GamePage/>}/>
                 </Routes>
             </BrowserRouter>

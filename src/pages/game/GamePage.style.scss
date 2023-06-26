@@ -79,9 +79,19 @@
 
   .logo-game-page {
     width: 50vmin;
+    top: 15%;
   }
 
   .lobby-code {
     font-size: 10vmin;
+    bottom: 15%;
+  }
+
+  .animation{
+    height: 45vmin;
+  }
+
+  .waiting-for-players-container {
+    font-size: 6vmin;
   }
 }

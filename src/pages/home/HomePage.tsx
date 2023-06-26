@@ -101,8 +101,8 @@ const HomePage = () => {
 
     return (
         <div className={`page-container ${fadeOut ? 'fade-out' : ''}`}>
-            <video autoPlay loop muted className={"background-video"}>
-                <source src="/background.mp4" type="video/mp4"/>
+            <video autoPlay loop muted playsInline className={"background-video"}>
+                <source src={"./background.mp4"} type="video/mp4"/>
             </video>
             <div className={"overlay"}/>
             <Container
@@ -117,6 +117,7 @@ const HomePage = () => {
             >
                 <Box
                     component="form"
+                    className="lobby-form"
                     sx={{
                         position: "absolute",
                         display: "flex",
@@ -137,7 +138,7 @@ const HomePage = () => {
                     noValidate
                     autoComplete="off"
                 >
-                    <img className={"logo"} src={"/logo.svg"} alt="Logo"/>
+                    <img className={"logo"} src={"./logo.svg"} alt="Logo"/>
                     <Box sx={{display: "flex", gap: "10px", zIndex: "1", width: "100%"}}>
                         <TextField
                             label="Enter Lobby Code"
@@ -155,6 +156,7 @@ const HomePage = () => {
                     </Button>
                 </Box>
                 <Box
+                    className="color-chooser-box-container"
                     sx={{
                         position: "absolute",
                         display: "flex",
@@ -170,7 +172,7 @@ const HomePage = () => {
                         visibility: showColorSelection ? "visible" : "hidden",
                     }}
                 >
-                    <img src={"/choose-color.svg"} alt="choose color" style={{width: "80%", padding: "6ch"}}/>
+                    <img className="choose-color-text" src={"./choose-color.svg"} alt="choose color"/>
                     <Box
                         sx={{
                             display: "flex",
@@ -183,9 +185,9 @@ const HomePage = () => {
                             borderRadius: "1ch",
                         }}
                     >
-                        <ColorChooserBox src="./color-pick-white.svg" color="white"
+                        <ColorChooserBox src={"./color-pick-white.svg"} color="white"
                                          onClick={() => createLobby("white")}/>
-                        <ColorChooserBox src="/color-pick-black.svg" color="black"
+                        <ColorChooserBox src="./color-pick-black.svg" color="black"
                                          onClick={() => createLobby("black")}/>
                     </Box>
                 </Box>

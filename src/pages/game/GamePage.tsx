@@ -321,7 +321,7 @@ const GamePage = () => {
 
   return (
       <div className={`game-page-container ${visibleClass}`}>
-        <img className={`logo-game-page ${visibleClass}`} src={"../logo.svg"} alt={"logo"}/>
+        <img className={`logo-game-page ${visibleClass}`} src={"/react_chess/logo.svg"} alt={"logo"}/>
         <div className={`chessboard-container ${scaleClass}`}>
           <div className={`chessboard-overlay ${isOtherPlayerConnected ? 'display-none' : ''}`}>
             <div className={"waiting-for-players-container"}>

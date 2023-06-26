@@ -12,6 +12,11 @@
   opacity: 0;
 }
 
+.choose-color-text {
+  width: 80%;
+  padding: 6ch;
+}
+
 .background-video {
   position: absolute;
   width: 100%;
@@ -31,4 +36,22 @@
 .logo {
   width: 80%;
   padding: 6ch;
+}
+
+@media screen and (max-width: 600px) {
+  .page-container {
+    height: -webkit-fill-available;
+  }
+
+  .lobby-form {
+    width: 70vw !important;
+  }
+
+  .color-chooser-box-container {
+    height: 80vmin !important;
+  }
+
+  .choose-color-text {
+    width: 85vmin;
+  }
 }
