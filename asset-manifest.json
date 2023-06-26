@@ -1,25 +1,25 @@
 {
   "files": {
-    "main.css": "http://localhost:3000/static/css/main.5543aadd.css",
-    "main.js": "http://localhost:3000/static/js/main.d3f276d4.js",
-    "index.html": "http://localhost:3000/index.html",
-    "static/media/bQ.svg": "http://localhost:3000/static/media/bQ.cfac07c4dd89221797ee6979e2b36bd9.svg",
-    "static/media/wQ.svg": "http://localhost:3000/static/media/wQ.1918a05d319c58d970444919a1a1c0ed.svg",
-    "static/media/bN.svg": "http://localhost:3000/static/media/bN.639167d02b62d014130267b54b8d5cab.svg",
-    "static/media/wN.svg": "http://localhost:3000/static/media/wN.badb6532efaee3bd0ff9a5784a764943.svg",
-    "static/media/bB.svg": "http://localhost:3000/static/media/bB.ef323c07b88cece44034c98914634a7b.svg",
-    "static/media/wB.svg": "http://localhost:3000/static/media/wB.7a61100e147d794a2efc09064a9cffe6.svg",
-    "static/media/bR.svg": "http://localhost:3000/static/media/bR.22be2b9414e0b3da2982210afa9ffb17.svg",
-    "static/media/wR.svg": "http://localhost:3000/static/media/wR.26a193d1d2ce6fdce7ec1bd6053d66b8.svg",
-    "static/media/bP.svg": "http://localhost:3000/static/media/bP.4bdbcf103c521224961ad33ce70e71cf.svg",
-    "static/media/wP.svg": "http://localhost:3000/static/media/wP.a84c9d0f07fd656c9d62b43ad7efa1cd.svg",
-    "static/media/bK.svg": "http://localhost:3000/static/media/bK.77df83adf8624370d626505ff080457d.svg",
-    "static/media/wK.svg": "http://localhost:3000/static/media/wK.483f109721298486cce4cb2ea2f9da99.svg",
-    "main.5543aadd.css.map": "http://localhost:3000/static/css/main.5543aadd.css.map",
-    "main.d3f276d4.js.map": "http://localhost:3000/static/js/main.d3f276d4.js.map"
+    "main.css": "https://stevicnenad.github.io/react_chess/static/css/main.5543aadd.css",
+    "main.js": "https://stevicnenad.github.io/react_chess/static/js/main.90ffa4df.js",
+    "index.html": "https://stevicnenad.github.io/react_chess/index.html",
+    "static/media/bQ.svg": "https://stevicnenad.github.io/react_chess/static/media/bQ.cfac07c4dd89221797ee6979e2b36bd9.svg",
+    "static/media/wQ.svg": "https://stevicnenad.github.io/react_chess/static/media/wQ.1918a05d319c58d970444919a1a1c0ed.svg",
+    "static/media/bN.svg": "https://stevicnenad.github.io/react_chess/static/media/bN.639167d02b62d014130267b54b8d5cab.svg",
+    "static/media/wN.svg": "https://stevicnenad.github.io/react_chess/static/media/wN.badb6532efaee3bd0ff9a5784a764943.svg",
+    "static/media/bB.svg": "https://stevicnenad.github.io/react_chess/static/media/bB.ef323c07b88cece44034c98914634a7b.svg",
+    "static/media/wB.svg": "https://stevicnenad.github.io/react_chess/static/media/wB.7a61100e147d794a2efc09064a9cffe6.svg",
+    "static/media/bR.svg": "https://stevicnenad.github.io/react_chess/static/media/bR.22be2b9414e0b3da2982210afa9ffb17.svg",
+    "static/media/wR.svg": "https://stevicnenad.github.io/react_chess/static/media/wR.26a193d1d2ce6fdce7ec1bd6053d66b8.svg",
+    "static/media/bP.svg": "https://stevicnenad.github.io/react_chess/static/media/bP.4bdbcf103c521224961ad33ce70e71cf.svg",
+    "static/media/wP.svg": "https://stevicnenad.github.io/react_chess/static/media/wP.a84c9d0f07fd656c9d62b43ad7efa1cd.svg",
+    "static/media/bK.svg": "https://stevicnenad.github.io/react_chess/static/media/bK.77df83adf8624370d626505ff080457d.svg",
+    "static/media/wK.svg": "https://stevicnenad.github.io/react_chess/static/media/wK.483f109721298486cce4cb2ea2f9da99.svg",
+    "main.5543aadd.css.map": "https://stevicnenad.github.io/react_chess/static/css/main.5543aadd.css.map",
+    "main.90ffa4df.js.map": "https://stevicnenad.github.io/react_chess/static/js/main.90ffa4df.js.map"
   },
   "entrypoints": [
     "static/css/main.5543aadd.css",
-    "static/js/main.d3f276d4.js"
+    "static/js/main.90ffa4df.js"
   ]
 }
