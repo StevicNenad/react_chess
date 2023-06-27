@@ -14,22 +14,22 @@
   position: relative;
   transition: width .5s ease, height .5s ease;
   height: fit-content;
+  flex-grow: 0;
+  flex-shrink: 0;
   width: 55vmin;
   box-shadow: 0 0 200px -200px white;
 }
 
 .logo-game-page {
   transition: opacity 1s 1s;
-  position: absolute;
   width: 20vmin;
   top: 5%;
   opacity: 0;
+  flex: 1;
 }
 
 .lobby-code {
   transition: opacity 1s 1.5s;
-  position: absolute;
-  bottom: 5%;
   color: #ccc;
   font-size: 5vmin;
   font-family: "Arial";
@@ -38,11 +38,9 @@
 
 .game-event {
   transition: opacity 1s;
-  position: absolute;
-  bottom: 10%;
   color: #ccc;
   font-size: 5vmin;
-  font-family: "Arial";
+  font-family: Arial, sans-serif;
   opacity: 0;
 }
 
@@ -70,6 +68,21 @@
   font-family: Arial, sans-serif;
 }
 
+.game-status-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.button-box {
+  display: flex;
+  flex-direction: row;
+  gap: 5ch;
+  padding: 5ch;
+}
+
 .visible {
   opacity: 1;
 }
@@ -93,12 +106,10 @@
 
   .logo-game-page {
     width: 50vmin;
-    top: 15%;
   }
 
   .lobby-code {
     font-size: 10vmin;
-    bottom: 15%;
   }
 
   .animation{

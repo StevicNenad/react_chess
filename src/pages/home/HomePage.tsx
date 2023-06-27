@@ -13,6 +13,7 @@ import {Chess} from "chess.ts";
 
 const HomePage = () => {
     const db = getDatabase();
+
     const [code, setCode] = useState("");
     const [showColorSelection, setShowColorSelection] = useState<Boolean>(false);
     const [fadeOut, setFadeOut] = useState(false);
@@ -40,7 +41,7 @@ const HomePage = () => {
 
                 setFadeOut(true);
                 setTimeout(() => {
-                    navigate(`/lobby/${code}`);
+                    navigate(`${process.env.REACT_APP_BASE_PATH}lobby/${code}`);
                 }, 2500);
             } else {
                 console.log("No data available");
@@ -63,6 +64,7 @@ const HomePage = () => {
                 player2: null,
                 player2Connected: false,
                 fen: new Chess().fen(),
+                pgn: new Chess().pgn()
             };
 
             lobby[color] = userID;
@@ -71,7 +73,7 @@ const HomePage = () => {
 
             setFadeOut(true);
             setTimeout(() => {
-                navigate(`/lobby/${lobbyId}`);
+                navigate(`${process.env.REACT_APP_BASE_PATH}lobby/${lobbyId}`);
             }, 2500);
         } catch (error) {
             console.error("Error creating lobby:", error);
@@ -79,12 +81,14 @@ const HomePage = () => {
     };
 
     const checkLobbyJoinPossible = (lobby: Lobby) => {
+        const userID = getUserID();
+
         if (lobby.player1Connected && lobby.player2Connected) {
             console.log("lobby full");
             return false;
         }
 
-        if (lobby.player1 && lobby.player2) {
+        if ((lobby.player1 && lobby.player2) && (lobby.player1 !== userID && lobby.player2 !== userID)) {
             console.log("player not recognized");
             return false;
         }
@@ -127,42 +131,16 @@ const HomePage = () => {
                 <source src="./background.mp4" type="video/mp4"/>
             </video>
             <div className={"overlay"}/>
-            <Container
-                sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    height: "100vh",
-                    zIndex: "1",
-                }}
-            >
+            <Container className="form-container">
                 <Box
-                    className={"lobby-form-box"}
+                    className={`lobby-form-box ${showColorSelection ? "show-color-selection" : ""}`}
                     component="form"
-                    sx={{
-                        position: "absolute",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        gap: "3ch",
-                        width: "45ch",
-                        p: 3,
-                        bgcolor: "rgba(255, 255, 255, 0.1)",
-                        border: "2px rgba(255, 255, 255, 0.1) solid",
-                        backdropFilter: "blur(8px)",
-                        zIndex: "2",
-                        borderRadius: "1ch",
-                        transition: "opacity 0.3s, visibility 0.3s",
-                        opacity: showColorSelection ? 0 : 1,
-                        visibility: showColorSelection ? "hidden" : "visible",
-                    }}
                     noValidate
                     autoComplete="off"
                     onSubmit={(event) => handleJoin(event)}
                 >
                     <img className={"logo"} src={"./logo.svg"} alt="Logo"/>
-                    <Box sx={{display: "flex", gap: "10px", zIndex: "1", width: "100%"}}>
+                    <Box className="join-lobby-box">
                         <TextField
                             label="Enter Lobby Code"
                             variant="outlined"
@@ -178,40 +156,14 @@ const HomePage = () => {
                         Create Lobby
                     </Button>
                 </Box>
-                <Box
-                    className={"color-chooser-container"}
-                    sx={{
-                        position: "absolute",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        gap: "5ch",
-                        zIndex: "1",
-                        width: "70%",
-                        maxWidth: "1000px",
-                        borderRadius: "1ch",
-                        transition: "opacity 0.5s 0.5s, visibility 0.5s 0.5s",
-                        opacity: showColorSelection ? 1 : 0,
-                        visibility: showColorSelection ? "visible" : "hidden",
-                    }}
-                >
+                <Box className={`color-chooser-container ${showColorSelection ? "show-color-selection" : ""}`}>
                     <img className={"choose-color-text"} src={"./choose-color.svg"} alt="choose color"/>
-                    <Box
-                        className={"color-chooser-box-container"}
-                        sx={{
-                            display: "flex",
-                            flexDirection: "row",
-                            alignItems: "center",
-                            justifyContent: "space-evenly",
-                            gap: "2ch",
-                            zIndex: "1",
-                            width: "100%",
-                            borderRadius: "1ch",
-                        }}
-                    >
-                        <ColorChooserBox src="./color-pick-white.svg" color="white"
+                    <Box className={"color-chooser-box-container"} >
+                        <ColorChooserBox src="./color-pick-white.svg"
+                                         color="white"
                                          onClick={() => createLobby("white")}/>
-                        <ColorChooserBox src="./color-pick-black.svg" color="black"
+                        <ColorChooserBox src="./color-pick-black.svg"
+                                         color="black"
                                          onClick={() => createLobby("black")}/>
                     </Box>
                 </Box>

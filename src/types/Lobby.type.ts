@@ -6,6 +6,7 @@ interface Lobby {
     player2: string | null;
     player2Connected: boolean;
     fen: string;
+    pgn: string;
 }
 
 export default Lobby;

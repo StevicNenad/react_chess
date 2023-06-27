@@ -12,6 +12,74 @@
   opacity: 0;
 }
 
+.form-container {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  z-index: 1;
+}
+
+.lobby-form-box {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3ch;
+  width: 45ch;
+  padding: 3ch;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 2px rgba(255, 255, 255, 0.1) solid;
+  backdrop-filter: blur(8px);
+  z-index: 2;
+  border-radius: 1ch;
+  transition: opacity 0.3s, visibility 0.3s;
+  opacity: 1;
+  visibility: visible;
+  &.show-color-selection {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.color-chooser-container {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5ch;
+  z-index: 1;
+  width: 70%;
+  max-width: 1000px;
+  border-radius: 1ch;
+  transition: opacity 0.5s 0.5s, visibility 0.5s 0.5s;
+  opacity: 0;
+  visibility: hidden;
+  &.show-color-selection {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+.color-chooser-box-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 2ch;
+  z-index: 1;
+  width: 100%;
+  border-radius: 1ch;
+}
+
+.join-lobby-box {
+  display: flex;
+  gap: 10px;
+  z-index: 1;
+  width: 100%;
+}
+
 .choose-color-text {
   width: 80%;
   padding: 6ch;
@@ -22,7 +90,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  zIndex: -1;
+  z-index: 0;
 }
 
 .overlay {
@@ -30,7 +98,7 @@
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
-  zIndex: 0;
+  z-index: 1;
 }
 
 .logo {
