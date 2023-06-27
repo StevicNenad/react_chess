@@ -89,11 +89,17 @@ const GamePage = () => {
       const updatedGame = new Chess(updatedFen);
       setGame(updatedGame);  // updating state triggers re-render
 
+      console.log("is check: " + updatedGame.inCheck());
+      console.log("is checkmate: " + updatedGame.inCheckmate());
+      console.log("is stalemate: " + updatedGame.inStalemate());
+      console.log("is gameover: " + updatedGame.gameOver());
+
       if(updatedGame.inCheck()) {
-        if(updatedGame.inCheckmate() || updatedGame.gameOver()) {
+        if(updatedGame.inCheckmate()) {
           setGameEvent("Checkmate");
+        } else {
+          setGameEvent("Check");
         }
-       setGameEvent("Check");
       }
 
       if(updatedGame.inStalemate()) {
