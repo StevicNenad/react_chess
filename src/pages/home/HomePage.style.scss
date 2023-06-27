@@ -38,20 +38,25 @@
   padding: 6ch;
 }
 
+.choose-color-text {
+  width: 80%;
+  padding: 6ch;
+}
+
 @media screen and (max-width: 600px) {
   .page-container {
     height: -webkit-fill-available;
   }
 
-  .lobby-form {
+  .lobby-form-box {
     width: 70vw !important;
   }
 
-  .color-chooser-box-container {
-    height: 80vmin !important;
+  .color-chooser-container {
+    width: 100% !important;
   }
 
   .choose-color-text {
-    width: 85vmin;
+    width: 80vmin;
   }
 }
