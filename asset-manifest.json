@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "https://stevicnenad.github.io/react_chess/static/css/main.624f011b.css",
-    "main.js": "https://stevicnenad.github.io/react_chess/static/js/main.e113541b.js",
+    "main.css": "https://stevicnenad.github.io/react_chess/static/css/main.40dafd59.css",
+    "main.js": "https://stevicnenad.github.io/react_chess/static/js/main.b97ef084.js",
     "index.html": "https://stevicnenad.github.io/react_chess/index.html",
     "static/media/bQ.svg": "https://stevicnenad.github.io/react_chess/static/media/bQ.cfac07c4dd89221797ee6979e2b36bd9.svg",
     "static/media/wQ.svg": "https://stevicnenad.github.io/react_chess/static/media/wQ.1918a05d319c58d970444919a1a1c0ed.svg",
@@ -15,11 +15,11 @@
     "static/media/wP.svg": "https://stevicnenad.github.io/react_chess/static/media/wP.a84c9d0f07fd656c9d62b43ad7efa1cd.svg",
     "static/media/bK.svg": "https://stevicnenad.github.io/react_chess/static/media/bK.77df83adf8624370d626505ff080457d.svg",
     "static/media/wK.svg": "https://stevicnenad.github.io/react_chess/static/media/wK.483f109721298486cce4cb2ea2f9da99.svg",
-    "main.624f011b.css.map": "https://stevicnenad.github.io/react_chess/static/css/main.624f011b.css.map",
-    "main.e113541b.js.map": "https://stevicnenad.github.io/react_chess/static/js/main.e113541b.js.map"
+    "main.40dafd59.css.map": "https://stevicnenad.github.io/react_chess/static/css/main.40dafd59.css.map",
+    "main.b97ef084.js.map": "https://stevicnenad.github.io/react_chess/static/js/main.b97ef084.js.map"
   },
   "entrypoints": [
-    "static/css/main.624f011b.css",
-    "static/js/main.e113541b.js"
+    "static/css/main.40dafd59.css",
+    "static/js/main.b97ef084.js"
   ]
 }
