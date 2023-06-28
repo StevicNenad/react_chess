@@ -6,12 +6,15 @@ import {Chess, Move, PieceSymbol} from "chess.ts";
 import {Square} from "chess.ts/dist/types";
 import {BoardOrientation} from "react-chessboard/dist/chessboard/types";
 import {useNavigate, useParams} from "react-router-dom";
-import {child, get, getDatabase, onDisconnect, onValue, ref, update} from "firebase/database";
+import {child, get, getDatabase, onDisconnect, onValue, ref, runTransaction, set, update} from "firebase/database";
 import Lobby from "../../types/Lobby.type";
 import Cookies from "js-cookie";
 import animationData from "../../assets/lottie/loading.json";
 import Lottie from "lottie-react";
-import {Box, Button} from "@mui/material";
+import {Box, Button, Typography} from "@mui/material";
+import RematchDialog from "../../component/Dialogs/RematchDialog/RematchDialog.component";
+import WaitingResponseDialog from "../../component/Dialogs/WaitingDialog/WaitingDialog.component";
+import RematchRejectedDialog from "../../component/Dialogs/RematchRejectedDialog/RematchRejectedDialog.component";
 
 const GamePage = () => {
     const {id} = useParams();
@@ -24,10 +27,16 @@ const GamePage = () => {
     const [game, setGame] = useState(new Chess());
     const [isOtherPlayerConnected, setOtherPlayerConnected] = useState(false);
     const [boardOrientation, setBoardOrientation] = useState<BoardOrientation>("white");
-    const [otherPlayer, setOtherPlayer] = useState("");
+    const [currentPlayer, setCurrentPlayer] = useState("");
+    const [opponent, setOpponent] = useState("");
     const [playerColor, setPlayerColor] = useState("");
     const [gameEventText, setGameEventText] = useState("");
     const [showButtons, setShowButtons] = useState(false);
+    const [openRematchDialog, setOpenRematchDialog] = useState(false);
+    const [openWaitingDialog, setOpenWaitingDialog] = useState(false);
+    const [openRejectedDialog, setOpenRejectedDialog] = useState(false);
+    const [currentPlayerScore, setCurrentPlayerScore] = useState(0);
+    const [opponentScore, setOpponentScore] = useState(0);
 
     const [moveFrom, setMoveFrom] = useState("");
     const [moveTo, setMoveTo] = useState<Square | null>(null);
@@ -40,22 +49,9 @@ const GamePage = () => {
     const [visibleClass, setVisibleClass] = useState("");
     const [scaleClass, setScaleClass] = useState("");
 
-
     useEffect(() => {
         isMounted.current = true;
-        const fetchLobby = async () => {
-            try {
-                const lobbyRef = child(ref(db), `lobbies/${id}`);
-                const snapshot = await get(lobbyRef);
 
-                const lobby: Lobby = snapshot.val();
-                if (isMounted.current) {
-                    setLobby(lobby);
-                }
-            } catch (error) {
-                console.log(error);
-            }
-        }
         fetchLobby();
 
         return () => {
@@ -65,14 +61,14 @@ const GamePage = () => {
 
     useEffect(() => {
         const fenRef = ref(db, `lobbies/${id}/fen`);
-        const pgnRef = ref(db, `lobbies/${id}/pgn`); // Create a reference to pgn
+        const pgnRef = ref(db, `lobbies/${id}/pgn`);
 
         const unsub = onValue(fenRef, async (snapshot) => {
             setGameEventText("");
             const updatedFen = snapshot.val();
             const updatedGame: Chess = new Chess(updatedFen);
 
-            const pgnSnapshot = await get(pgnRef); // Fetch the current pgn value
+            const pgnSnapshot = await get(pgnRef);
             const updatedPgn = pgnSnapshot.val();
 
             updatedGame.loadPgn(updatedPgn);
@@ -85,35 +81,131 @@ const GamePage = () => {
     }, []);
 
     useEffect(() => {
+        const rematchRequestsRef = ref(db, `lobbies/${id}/rematchRequests`);
+
+        const unsub = onValue(rematchRequestsRef, async (snapshot) => {
+            const rematchRequests = snapshot.val();
+
+            if (rematchRequests) {
+                if (rematchRequests.length > 1) {
+                    setOpenRematchDialog(false);
+                    setOpenWaitingDialog(false);
+                    if (rematchRequests[0] === currentUserId) {
+                        await startNewGame();
+                    }
+                } else if (rematchRequests.includes(currentUserId)) {
+                    setOpenWaitingDialog(true);
+                } else {
+                    setOpenRematchDialog(true);
+                }
+            }
+        });
+
+        return () => {
+            unsub();
+        };
+    }, []);
+
+    useEffect(() => {
+        const matchCountRef = ref(db, `lobbies/${id}/matchCount`);
+
+        const unsub = onValue(matchCountRef, (snapshot) => {
+            const newMatchCount = snapshot.val();
+
+            if (newMatchCount !== null) {
+                fetchLobby();
+            }
+        });
+
+        return () => {
+            unsub();
+        };
+    }, [id, db]);
+
+    useEffect(() => {
+        const rematchRejectedRef = ref(db, `lobbies/${id}/rematchRejected`);
+
+        const unsub = onValue(rematchRejectedRef, async (snapshot) => {
+            const rematchRejected = snapshot.val();
+
+            if (rematchRejected) {
+                setOpenRematchDialog(false);
+                setOpenWaitingDialog(false);
+                setOpenRejectedDialog(true);
+
+                setVisibleClass("");
+
+                setTimeout(() => {
+                    openMainMenu();
+                }, 2500);
+            }
+        });
+
+        return () => {
+            unsub();
+        };
+    }, []);
+
+    useEffect(() => {
         if (!lobby) {
             return;
         }
-        let currentPlayerConnected: string;
 
         if (lobby.player1 === currentUserId) {
-            currentPlayerConnected = "player1Connected";
-            setOtherPlayer("player2");
+            setCurrentPlayerScore(lobby.player1Score);
+            setOpponentScore(lobby.player2Score);
+            setOpponent("player2");
+            setCurrentPlayer("player1");
         } else {
-            currentPlayerConnected = "player2Connected";
-            setOtherPlayer("player1");
+            setCurrentPlayerScore(lobby.player2Score);
+            setOpponentScore(lobby.player1Score);
+            setOpponent("player1");
+            setCurrentPlayer("player2");
         }
+
+        configureBoard();
+
+    }, [lobby]);
+
+    useEffect(() => {
+        if (!lobby || !currentPlayer) {
+            return;
+        }
+
+        let currentPlayerConnected = `${currentPlayer}Connected`;
 
         const lobbyRef = child(ref(db), `lobbies/${id}`);
         update(lobbyRef, {[currentPlayerConnected]: true});
 
         onDisconnect(child(lobbyRef, currentPlayerConnected)).set(false);
 
-        configureBoard();
-
         return () => {
             update(lobbyRef, {[currentPlayerConnected]: false});
         };
-
-    }, [lobby]);
+    }, [lobby, currentPlayer]);
 
 
     useEffect(() => {
-        const otherPlayerRef = ref(db, `lobbies/${id}/${otherPlayer}Connected`);
+        const currentPlayerScoreRef = ref(db, `lobbies/${id}/${currentPlayer}Score`);
+        const opponentScoreRef = ref(db, `lobbies/${id}/${opponent}Score`);
+
+        const unsubCurrentPlayer = onValue(currentPlayerScoreRef, async (snapshot) => {
+            setCurrentPlayerScore(snapshot.val());
+        });
+
+        const unsubOpponent = onValue(opponentScoreRef, async (snapshot) => {
+            setOpponentScore(snapshot.val());
+        });
+
+        return () => {
+            unsubCurrentPlayer();
+            unsubOpponent();
+        };
+    }, [opponent]);
+
+
+    useEffect(() => {
+        const otherPlayerRef = ref(db, `lobbies/${id}/${opponent}Connected`);
         const unsub = onValue(otherPlayerRef, (snapshot) => {
             if (snapshot.exists()) {
                 const otherPlayerConnected = snapshot.val();
@@ -124,7 +216,7 @@ const GamePage = () => {
         return () => {
             unsub();
         };
-    }, [otherPlayer]);
+    }, [opponent]);
 
     useEffect(() => {
         manageGameState();
@@ -139,13 +231,7 @@ const GamePage = () => {
             return
         }
 
-        if (lobby.white === currentUserId) {
-            setBoardOrientation("white");
-            setPlayerColor("w");
-        } else {
-            setBoardOrientation("black");
-            setPlayerColor("b");
-        }
+        configureColors();
 
         const loadedGame: Chess = new Chess(lobby.fen);
         loadedGame.loadPgn(lobby.pgn);
@@ -155,12 +241,38 @@ const GamePage = () => {
         setScaleClass("scale");
     }
 
-    const manageGameState = () => {
+    const configureColors = () => {
+        if (!lobby) {
+            return
+        }
+
+        if (lobby.white === currentUserId) {
+            setBoardOrientation("white");
+            setPlayerColor("w");
+        } else {
+            setBoardOrientation("black");
+            setPlayerColor("b");
+        }
+    }
+
+    const manageGameState = async () => {
         if (game.inCheck()) {
             if (game.inCheckmate()) {
-                const gameMessage: string = checkIfPlayersTurn() ? ", you lost" : ", you won";
-                setGameEventText("Checkmate");
-                setShowButtons(true);
+                if (checkIfPlayersTurn()) {
+                    const opponentScoreRef = ref(db, `lobbies/${id}/${opponent}Score`);
+
+                    await runTransaction(opponentScoreRef, (score) => {
+                        if (score === null) {
+                            score = 0;
+                        } else {
+                            score++;
+                        }
+                        return score;
+                    });
+                    setGameEventText("Defeat");
+                } else {
+                    setGameEventText("Victory");
+                }
             } else {
                 setGameEventText("Check");
             }
@@ -168,6 +280,12 @@ const GamePage = () => {
 
         if (game.inStalemate()) {
             setGameEventText("Stalemate");
+        }
+
+        if (game.gameOver()) {
+            setShowButtons(true);
+        } else {
+            setShowButtons(false);
         }
     }
 
@@ -261,7 +379,6 @@ const GamePage = () => {
                 return;
             }
 
-            setGame(gameCopy);
             saveGame(gameCopy);
 
             setMoveFrom("");
@@ -284,7 +401,6 @@ const GamePage = () => {
             to: targetSquare,
             promotion: symbol ?? "q",
         });
-        setGame(gameCopy);
 
         if (move === null) return false;
 
@@ -347,12 +463,99 @@ const GamePage = () => {
         return activeColor === playerColor;
     }
 
+    const sendRematchRequest = async () => {
+        const rematchRequestsRef = ref(db, `lobbies/${id}/rematchRequests`);
+
+        await runTransaction(rematchRequestsRef, (rematchRequests) => {
+            if (rematchRequests) {
+                if (!rematchRequests.includes(currentUserId)) {
+                    rematchRequests.push(currentUserId);
+                }
+            } else {
+                rematchRequests = [currentUserId];
+            }
+            return rematchRequests;
+        });
+    }
+
+    const fetchLobby = async () => {
+        try {
+            const lobbyRef = child(ref(db), `lobbies/${id}`);
+            const snapshot = await get(lobbyRef);
+
+            const lobby: Lobby = snapshot.val();
+            if (isMounted.current) {
+                setLobby(lobby);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const startNewGame = async () => {
+        const game = new Chess();
+
+        const fen = game.fen();
+        const pgn = game.pgn();
+
+        const gameRef = ref(db, `lobbies/${id}`);
+        const snapshot = await get(gameRef);
+        const gameData = snapshot.val();
+        const {white, black} = gameData;
+
+        const newGameData = {
+            ...gameData,
+            white: black,
+            black: white,
+            fen,
+            pgn,
+            rematchRequests: [],
+            matchCount: gameData.matchCount + 1
+        };
+
+        await update(gameRef, newGameData);
+    }
+
+    const handleClose = () => {
+        setOpenRematchDialog(false);
+        setOpenWaitingDialog(false);
+    };
+
+    const handleConfirm = async () => {
+        await sendRematchRequest();
+        setOpenRematchDialog(false);
+    };
+
+    const handleReject = async () => {
+        const rematchRejectedRef = ref(db, `lobbies/${id}/rematchRejected`);
+
+        await set(rematchRejectedRef, true);
+    }
+
+    const handleCancel = () => {
+        // potentially cancel the rematch request here
+        setOpenWaitingDialog(false);
+    };
+
+    const handleCLose = (event: React.SyntheticEvent, reason: 'backdropClick' | 'escapeKeyDown') => {
+        if (reason !== 'backdropClick') {
+            return;
+        }
+        setOpenWaitingDialog(false);
+    }
+
 
     return (
         <div className={`game-page-container ${visibleClass}`}>
-            <img className={`logo-game-page ${visibleClass}`}
-                 src={(process.env.REACT_APP_ENVIROMENT === "dev" ? ".." : process.env.REACT_APP_BASE_PATH) + "/logo.svg"}
-                 alt={"logo"}/>
+            <WaitingResponseDialog open={openWaitingDialog} onCancel={handleCancel} onClose={handleClose}/>
+            <RematchDialog open={openRematchDialog} onClose={handleReject} onConfirm={handleConfirm}/>
+            <RematchRejectedDialog open={openRejectedDialog}/>
+            <div className={`logo-score-container ${visibleClass}`}>
+                <img className={`logo-game-page`}
+                     src={(process.env.REACT_APP_ENVIROMENT === "dev" ? ".." : process.env.REACT_APP_BASE_PATH) + "/logo.svg"}
+                     alt={"logo"}/>
+                <Typography variant={"h3"} className={"score"}>{currentPlayerScore} - {opponentScore}</Typography>
+            </div>
             <div className={`chessboard-container ${scaleClass}`}>
                 <div className={`chessboard-overlay ${isOtherPlayerConnected ? "display-none" : ""}`}>
                     <div className={"waiting-for-players-container"}>
@@ -388,15 +591,18 @@ const GamePage = () => {
             </div>
             <div className={"game-status-box"}>
                 <Box className={`button-box ${showButtons ? "" : "display-none"}`}>
-                    <Button variant={"outlined"} onClick={() => {openMainMenu()}}>Back to Main Menu</Button>
+                    <Button variant={"contained"} onClick={sendRematchRequest}>Rematch</Button>
+                    <Button variant={"outlined"} onClick={() => {
+                        openMainMenu()
+                    }}>Back to Main Menu</Button>
                 </Box>
-                <div className={`lobby-code ${visibleClass} ${isOtherPlayerConnected ? "display-none" : ""}`}>
+                <Typography className={`lobby-code ${visibleClass} ${isOtherPlayerConnected ? "display-none" : ""}`}>
                     {id}
-                </div>
-                <div className={`game-event ${!isOtherPlayerConnected && gameEventText ? "visible" : "display-none"}`}>
+                </Typography>
+                <Typography
+                    className={`game-event ${isOtherPlayerConnected && gameEventText ? "visible" : "display-none"}`}>
                     {gameEventText}
-                </div>
-
+                </Typography>
             </div>
         </div>
     );

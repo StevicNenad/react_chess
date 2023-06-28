@@ -34,10 +34,11 @@
   backdrop-filter: blur(8px);
   z-index: 2;
   border-radius: 1ch;
-  transition: opacity 0.3s, visibility 0.3s;
+  transition: opacity 0.3s 0.5s, visibility 0.3s 0.5s;
   opacity: 1;
   visibility: visible;
   &.show-color-selection {
+    transition: opacity 0.3s, visibility 0.3s;
     opacity: 0;
     visibility: hidden;
   }
@@ -53,10 +54,11 @@
   width: 70%;
   max-width: 1000px;
   border-radius: 1ch;
-  transition: opacity 0.5s 0.5s, visibility 0.5s 0.5s;
+  transition: opacity 0.3s, visibility 0.3s;
   opacity: 0;
   visibility: hidden;
   &.show-color-selection {
+    transition: opacity 0.5s 0.5s, visibility 0.5s 0.5s;
     opacity: 1;
     visibility: visible;
   }
@@ -122,6 +124,14 @@
 
   .color-chooser-container {
     width: 100% !important;
+  }
+
+  .choose-color-text {
+    padding: 0;
+  }
+
+  .color-chooser-box-container {
+    gap: 0;
   }
 
   .choose-color-text {

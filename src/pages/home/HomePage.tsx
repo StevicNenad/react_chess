@@ -7,7 +7,7 @@ import "./HomePage.style.scss";
 import ColorChooserBox from "../../component/ColorChooserBox/ColorChooserBox.component";
 import {child, get, getDatabase, goOnline, ref, set,} from "firebase/database";
 import {BoardOrientation} from "react-chessboard/dist/chessboard/types";
-import Lobby from "../../types/Lobby.type";
+import Lobby, {LobbyStatus} from "../../types/Lobby.type";
 import {Chess} from "chess.ts";
 
 
@@ -18,10 +18,6 @@ const HomePage = () => {
     const [showColorSelection, setShowColorSelection] = useState<Boolean>(false);
     const [fadeOut, setFadeOut] = useState(false);
     const navigate = useNavigate();
-
-    useEffect(() => {
-        goOnline(db);
-    }, [])
 
     const handleJoin = async (event: React.FormEvent<HTMLFormElement> | undefined) => {
         event?.preventDefault();
@@ -61,10 +57,14 @@ const HomePage = () => {
                 black: null,
                 player1: userID,
                 player1Connected: false,
+                player1Score: 0,
                 player2: null,
                 player2Connected: false,
+                player2Score: 0,
                 fen: new Chess().fen(),
-                pgn: new Chess().pgn()
+                pgn: new Chess().pgn(),
+                lobbyStatus: LobbyStatus.NewGame,
+                matchCount: 1,
             };
 
             lobby[color] = userID;
@@ -166,6 +166,7 @@ const HomePage = () => {
                                          color="black"
                                          onClick={() => createLobby("black")}/>
                     </Box>
+                    <Button variant={"outlined"} onClick={() => setShowColorSelection(false)}>Cancel</Button>
                 </Box>
             </Container>
         </div>

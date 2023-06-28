@@ -20,26 +20,39 @@
   box-shadow: 0 0 200px -200px white;
 }
 
-.logo-game-page {
-  transition: opacity 1s 1s;
-  width: 20vmin;
-  top: 5%;
-  opacity: 0;
+.logo-score-container {
+  transition: opacity 1s 1s, visibility 1s 1s;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 20vmin;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.logo-game-page {
+  width: 20vmin;
+}
+
+.score {
+  color: #ccc;
+  font-size: 40pt;
 }
 
 .lobby-code {
   transition: opacity 1s 1.5s;
   color: #ccc;
-  font-size: 5vmin;
-  font-family: "Arial";
+  font-size: 5vmin !important;
+  font-family: Arial, sans-serif;
   opacity: 0;
 }
 
 .game-event {
   transition: opacity 1s;
   color: #ccc;
-  font-size: 5vmin;
+  font-size: 5vmin !important;
   font-family: Arial, sans-serif;
   opacity: 0;
 }
@@ -73,18 +86,18 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: space-evenly;
 }
 
 .button-box {
   display: flex;
-  flex-direction: row;
-  gap: 5ch;
-  padding: 5ch;
+  gap: 5vmin;
+  justify-content: space-evenly;
 }
 
 .visible {
   opacity: 1;
+  visibility: visible;
 }
 
 .scale {
@@ -104,12 +117,20 @@
     width: 100%;
   }
 
-  .logo-game-page {
+  .logo-score-container {
     width: 50vmin;
   }
 
+  .logo-game-page {
+    width: 40vmin;
+  }
+
+  .score {
+    font-size: 7vmin !important;
+  }
+
   .lobby-code {
-    font-size: 10vmin;
+    font-size: 6vmin !important;
   }
 
   .animation{
@@ -118,5 +139,13 @@
 
   .waiting-for-players-container {
     font-size: 6vmin;
+  }
+
+  .game-status-box {
+    width: 100%;
+  }
+
+  .game-event {
+    font-size: 10vmin !important;
   }
 }
